@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -28,3 +29,14 @@ jobs:
       with:
         name: apk
         path: app/build/outputs/apk/
+    - name: PR에 APK artifact URL 코멘트 추가
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '${{ steps.upload_apk.outputs.artifact_url }}'
+          })
